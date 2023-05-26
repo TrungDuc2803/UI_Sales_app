@@ -60,9 +60,9 @@ public class HomeFragment extends Fragment {
     /// Search view
 
     EditText search_box;
-    private ArrayList<PostSales> viewAllModelList;
+    private ArrayList<PostSales> resultSearch = new ArrayList<PostSales>();
     private RecyclerView recyclerViewSearch;
-    private PostsByTypeAdapter viewAllAdapter;
+    private PostSalesAdapter searchAdapter;
 
 
     @Nullable
@@ -75,15 +75,44 @@ public class HomeFragment extends Fragment {
         recommendRecyclerView = view.findViewById(R.id.reccommended_rec);
 
 
+
+
+
+
         //search view
+        recyclerViewSearch = view.findViewById(R.id.search_rec);
         search_box = view.findViewById(R.id.search_box);
         recyclerViewSearch.setLayoutManager(new LinearLayoutManager(getContext()));
-        recyclerViewSearch.setAdapter(viewAllAdapter);
+        recyclerViewSearch.setAdapter(searchAdapter);
         recyclerViewSearch.setHasFixedSize(true);
+
+        search_box.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                if(editable.toString().trim() == ""){
+                    resultSearch.clear();
+                    searchAdapter.notifyDataSetChanged();
+                    return;
+                }
+                searchProduct(editable.toString());
+            }
+        });
 
         CallAPITypeGood();
         CallAPIPostSales();
         CallAPIRecommended();
+
+
         return view;
     }
 
@@ -146,34 +175,42 @@ public class HomeFragment extends Fragment {
     }
 
 
-    public void SearchBox()
-    {
-        search_box.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
+    private void searchProduct(String inputSearch) {
+
+        SharedPreferences sharedPreferences = getContext().getSharedPreferences("MyPrefs", Context.MODE_PRIVATE);
+        String token = sharedPreferences.getString("token", null);
+
+        APIPostSales.apiService.findIncludeName("Bearer " + token, inputSearch).enqueue(new Callback<ResultPostSales>() {
+            @Override
+            public void onResponse(Call<ResultPostSales> call, Response<ResultPostSales> response) {
+                ResultPostSales res = response.body();
+
+                if(res != null && res.getResult()){
+
+                    resultSearch.clear();
+
+                    resultSearch = res.getData();
+
+                    searchAdapter = new PostSalesAdapter(resultSearch, getContext());
+
+                    recyclerViewSearch.setAdapter(searchAdapter);
+                    LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
+                    recyclerViewSearch.setLayoutManager(layoutManager);
+
+
+                }
+                else {
+
+                    Log.e("Search", "Call API that bai");
+                }
             }
 
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                if(s.toString().isEmpty()){
-                    viewAllModelList.clear();
-                    viewAllAdapter.notifyDataSetChanged();
-                }
-                else{
-                    searchProduct(s.toString());
-                }
+            public void onFailure(Call<ResultPostSales> call, Throwable t) {
+                Log.e("Search", t.getMessage());
             }
         });
-    }
-
-    private void searchProduct(String type) {
-        
     }
 
 

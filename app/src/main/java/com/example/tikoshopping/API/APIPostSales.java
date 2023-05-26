@@ -69,4 +69,7 @@ public interface APIPostSales {
     Call<ResultPostSales> getPostSalesByTypeGoodsID(@Header("Authorization") String token,@Query("id_type") int idType);
 
 
+    @GET("/api/sales/findname")
+    Call<ResultPostSales> findIncludeName (@Header("Authorization") String token ,@Query("name") String name);
+
 }

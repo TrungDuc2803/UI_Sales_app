@@ -43,7 +43,6 @@ public class PostSalesAdapter extends RecyclerView.Adapter<PostSalesAdapter.View
 //        holder.price.setText(item.getPrice().toString());
         Glide.with(context).load(_Constant.baseUrl+item.getImages().get(0).getPath()).into(holder.popImg);
 
-
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

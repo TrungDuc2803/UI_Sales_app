@@ -63,6 +63,9 @@ public interface APIUser {
     @POST("/api/user/changeavatar")
     Call<ResultBase> ChangeAvatar( @Header("Authorization") String token , @Part MultipartBody.Part photo);
 
+    @GET("/api/user/find")
+    Call<User> FindUserById (@Header("Authorization") String token , @Query("id") int id);
+
 
 
 
